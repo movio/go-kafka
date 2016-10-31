@@ -2,10 +2,6 @@ package partitioner
 
 import "github.com/Shopify/sarama"
 
-// This matches the Apache Kakfa seed:
-// https://github.com/apache/kafka/blob/trunk/clients/src/main/java/org/apache/kafka/common/utils/Utils.java#L342
-const murmurSeed = 0x9747b28c
-
 // Murmur2Partitioner is a matching implemention for the current (10.1) kafka partitioner. It will generate the same partition ID's a the default Kafka client and hence can be as a replacement with correct inter op
 type Murmur2Partitioner struct {
 	random sarama.Partitioner
@@ -28,7 +24,7 @@ func (p *Murmur2Partitioner) Partition(message *sarama.ProducerMessage, numParti
 	if err != nil {
 		return -1, err
 	}
-	return partition(bytes, numPartitions), nil
+	return Murmur2Partition(bytes, numPartitions), nil
 }
 
 // RequiresConsistency is always true for this implemention
@@ -36,7 +32,7 @@ func (p *Murmur2Partitioner) RequiresConsistency() bool {
 	return true
 }
 
-func partition(bytes []byte, numPartitions int32) int32 {
+func Murmur2Partition(bytes []byte, numPartitions int32) int32 {
 	hash := MurmurHash2(bytes)
 	partition := positive(hash) % numPartitions
 	return partition
@@ -47,18 +43,17 @@ func positive(v int32) int32 {
 	return v & 0x7fffffff
 }
 
-// Mixing constants; generated offline.
-const (
-	M = 0x5bd1e995
-	R = 24
-	// From https://github.com/apache/kafka/blob/0.10.1/clients/src/main/java/org/apache/kafka/common/utils/Utils.java#L342
-	seed = int32(-1756908916)
-)
-
 // The original MurmurHash2 32-bit algorithm by Austin Appleby.
 // Taken from https://github.com/aviddiviner/go-murmur by David Irvine
 // Adapted to match the behavior of the Java Kafka Client
 func MurmurHash2(data []byte) (h int32) {
+	const (
+		M = 0x5bd1e995
+		R = 24
+		// From https://github.com/apache/kafka/blob/0.10.1/clients/src/main/java/org/apache/kafka/common/utils/Utils.java#L342
+		seed = int32(-1756908916)
+	)
+
 	var k int32
 
 	h = seed ^ int32(len(data))
