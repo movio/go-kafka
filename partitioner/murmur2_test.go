@@ -21,16 +21,16 @@ func TestHasing(t *testing.T) {
 		if v := positive(MurmurHash2(i.key)); v != i.expectedPos {
 			t.Errorf("Positive, expected: %v, got: %v\n", i.expectedPos, v)
 		}
-		if v := partition(i.key, 2); v != i.expected2 {
+		if v := Murmur2Partition(i.key, 2); v != i.expected2 {
 			t.Errorf("2 patitions, expected: %v, got: %v\n", v, i.expected2)
 		}
-		if v := partition(i.key, 3); v != i.expected3 {
+		if v := Murmur2Partition(i.key, 3); v != i.expected3 {
 			t.Errorf("3 patitions, expected: %v, got: %v\n", v, i.expected3)
 		}
-		if v := partition(i.key, 100); v != i.expected100 {
+		if v := Murmur2Partition(i.key, 100); v != i.expected100 {
 			t.Errorf("100 patitions, expected: %v, got: %v\n", v, i.expected100)
 		}
-		if v := partition(i.key, 999); v != i.expected999 {
+		if v := Murmur2Partition(i.key, 999); v != i.expected999 {
 			t.Errorf("999 patitions, expected: %v, got: %v\n", v, i.expected999)
 		}
 	}
